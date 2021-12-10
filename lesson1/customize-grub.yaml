@@ -1,0 +1,47 @@
+---
+- name: customize_core_parameters
+  hosts: all
+  gather_facts: true
+  become: true
+  vars:
+    grub_file: /etc/default/grub
+
+  tasks:
+    - name: check if ifnames parameter is in GRUB_CMDLINE_LINUX line
+      lineinfile:
+        path: "{{ grub_file }}"
+        regexp: '^GRUB_CMDLINE_LINUX=".*(net\.ifnames=[\d]{1,})'
+        state: absent
+      check_mode: true
+      register: ifnames_is_in_file
+
+    - name: insert ifnames in GRUB_CMDLINE_LINUX line
+      lineinfile:
+        path: "{{ grub_file }}"
+        regexp: ^(GRUB_CMDLINE_LINUX=\".*)(")$
+        line: \g<1> net.ifnames=0"
+        backrefs: true
+      when: not ifnames_is_in_file.found
+      register: ifnames_inserted
+
+    - name: check if biosdevname parameter is in GRUB_CMDLINE_LINUX line
+      lineinfile:
+        path: "{{ grub_file }}"
+        regexp: '^GRUB_CMDLINE_LINUX=".*(biosdevname=[\d]{1,})'
+        state: absent
+      check_mode: true
+      register: biosdevname_is_in_file
+
+    - name: insert biosdevname in GRUB_CMDLINE_LINUX line
+      lineinfile:
+        path: "{{ grub_file }}"
+        regexp: ^(GRUB_CMDLINE_LINUX=\".*)(")$
+        line: \g<1> biosdevname=0"
+        backrefs: true
+      when: not biosdevname_is_in_file.found
+      register: biosdevname_inserted
+
+    - name: execute grub2-mkconfig to reconfigure GRUB
+      shell: grub2-mkconfig
+      when: (ifnames_is_in_file and biosdevname_is_in_file) or (ifnames_inserted and biosdevname_inserted)
+...

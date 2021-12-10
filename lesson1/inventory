@@ -1,0 +1,10 @@
+all:
+    hosts:
+        control.example.com:
+    children:
+        web:
+            hosts:
+                node1.example.com:
+        db:
+            hosts:
+                node2.example.com:

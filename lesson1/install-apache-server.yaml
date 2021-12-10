@@ -1,0 +1,63 @@
+---
+- name: install apache
+  hosts: web
+  gather_facts: true
+  become: true
+  vars:
+    html_file: /var/www/html/index.html
+
+  tasks:
+    ## Install Apache service
+    ##
+    - name: Install Apache httpd service
+      yum:
+        name: httpd
+        state: present
+      register: httpd_istalled
+
+    ## Check and add index.html file
+    ##
+    - name: Check that the {{ html_file }} exists
+      stat:
+        path: "{{ html_file }}"
+      register: index_file
+
+    - name: Create index file {{ html_file }}
+      file:
+        path: "{{ html_file }}"
+        state: touch
+        owner: apache
+        group: apache
+        mode: '0644'
+      when: not index_file.stat.exists
+      register: index_file_created
+
+    - name: Put some content into the index file
+      copy:
+        dest: "{{ html_file }}"
+        content: Welcome to my web server
+      when: index_file_created.changed
+      register: index_file_content
+
+    ## Get Web Server up and running
+    ##
+    - name: Start httpd service
+      systemd:
+        name: httpd
+        state: restarted
+        enabled: yes
+      when: index_file_content.changed and httpd_istalled.changed
+
+    ## Allow access to http
+    ##
+    - name: Enable http port
+      firewalld:
+        service: http
+        permanent: yes
+        state: enabled
+
+    - name: Restart service firewalld
+      service:
+        name: firewalld
+        state: reloaded
+...

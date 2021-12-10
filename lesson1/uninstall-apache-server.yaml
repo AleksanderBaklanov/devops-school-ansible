@@ -1,0 +1,81 @@
+---
+- name: UNinstall apache
+  hosts: web
+  gather_facts: true
+  become: true
+  vars:
+    html_file: /var/www/html/index.html
+
+  tasks:
+    ## Uninstalling Apache Service
+    ##
+    - name: Populate service facts
+      service_facts:
+
+    - name: debug service search
+      debug:
+        msg: "No httpd.service fount in services -> exiting"
+      when: "'httpd.service' not in services"
+
+    - name: exit if no service found
+      meta: end_play
+      when: "'httpd.service' not in services"
+
+    - name: register facts that httpd service up and running
+      set_fact:
+        httpd_state: "{{ services['httpd.service'].state }}"
+        httpd_status: "{{ services['httpd.service'].status }}"
+      when: "'httpd.service' in services"
+      register: facts_registered
+
+    - name: Stop httpd service
+      service:
+        name: httpd
+        state: stopped
+      when: httpd_state == 'running'
+
+    - name: Disable httpd service
+      service:
+        name: httpd
+        enabled: false
+      when: httpd_status == 'enabled'
+
+    - name: Uninstall Apache httpd service
+      yum:
+        name: httpd
+        state: absent
+      when: services['httpd.service']
+
+    ## Deleting Web Site :)
+    ##
+    - name: Check that the {{ html_file }} exists
+      stat:
+        path: "{{ html_file }}"
+      register: index_file
+
+    - name: Remove index file {{ html_file }} if exists
+      file:
+        path: "{{ html_file }}"
+        state: absent
+      when: index_file.stat.exists
+
+    ## Disabling firewall
+    ##
+    - name: get list of firewall rules
+      shell: iptables-save | grep 80
+      register: iptables_rule
+
+    - name: Block http port
+      firewalld:
+        service: http
+        permanent: true
+        state: disabled
+      when: "'ACCEPT' in iptables_rule.stdout"
+      register: port_is_blocked
+
+    - name: Restart service firewalld
+      service:
+        name: firewalld
+        state: reloaded
+      when: port_is_blocked.changed
+...
