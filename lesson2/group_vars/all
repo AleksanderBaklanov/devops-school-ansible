@@ -1,0 +1,8 @@
+users:
+  alice:
+    password: "$6$ZJxniDSF$fAYwykAnFIBXfw1Z7u/noH6t7b71tXRlL.BWJTmsUork2ZvHVD4mZcfQ5hJxZfUYbVnVsfJi2uysKINyb/tOK1"
+  bob:
+    password: "$6$4uNRBm3J$i2bDUD0k9BGJpa6eNgcxT0/DqDyI3xIPGxm3Eg9tRIPOqC1rmznUzeb.w8gxG2Z9h4G8vcP75tYx6Wz.p4u.S."
+  carol:
+    password: "$6$Q4OUJqKV$ydAOEBuKNh1.kBqZPFC0NeM6hdtQoZL0ZanKvpYLkIGwrEi1ef9D1WuM54WwB3EElkOmkONfIAHznaBOsWlMB/"
+

@@ -19,7 +19,9 @@
         state: present
         path: "{{ grub_file }}"
         backrefs: true
-        regexp: '^(GRUB_CMDLINE_LINUX=(?!.*{{ item.value.name }})\"[^\"]+)(\".*)'
+#        ???????????????????????
+#        regexp: '^(GRUB_CMDLINE_LINUX=".*{{ item.value.name }}.*)(")$'
+        regexp: '^(GRUB_CMDLINE_LINUX=(?!.*{{ item.value.name }}) \"[^\"]+)(\".*)'
         line: '\1  {{ item.value.name }}={{ item.value.val }}\2'
       with_dict: "{{ options }}"
       notify: reload grub

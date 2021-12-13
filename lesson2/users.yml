@@ -1,0 +1,18 @@
+---
+- name: customize_core_parameters
+  hosts: all
+  gather_facts: true
+  become: true
+
+  tasks:
+  - name: Add systemc users
+    user:
+      name: "{{ item.key }}"
+      password: "{{ item.value.password }}"
+      update_password: on_create
+      comment: "{{ item.key }}@example.com"
+      shell: /bin/bash
+      home: "/home/{{ item.key }}"
+      state: present
+    with_dict: "{{ users }}"
+...
