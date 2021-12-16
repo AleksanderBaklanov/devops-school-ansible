@@ -9,24 +9,24 @@
 # capabilities.
 #
 # Allow anonymous FTP? (Beware - allowed by default if you comment this out).
-{% if services.anonymous_enable %}
-   anonymous_enable={{ services.anonymous_enable }}
+{% if service_options.anonymous_enable %}
+   anonymous_enable={{ service_options.anonymous_enable }}
    hide_ids=NO
-   anon_mkdir_write_enable={{ services.anonymous_enable }}
-   anon_other_write_enable={{ services.anonymous_enable }}
-   no_anon_password={{ services.anonymous_enable }}
+   anon_mkdir_write_enable={{ service_options.anonymous_enable }}
+   anon_other_write_enable={{ service_options.anonymous_enable }}
+   no_anon_password={{ service_options.anonymous_enable }}
    pasv_min_port=40000
    pasv_max_port=40001
-   anon_root={{ services.anonymous_dir }}
+   anon_root={{ service_options.anonymous_dir }}
 {% endif %}
 
-{% if services.anonymous_upload_enable %}
-  anon_upload_enable={{ services.anonymous_upload_enable }}
+{% if service_options.anonymous_upload_enable %}
+  anon_upload_enable={{ service_options.anonymous_upload_enable }}
 {% endif %}
 
 #
 # Uncomment this to allow local users to log in.
-{% if services.anonymous_enable %}
+{% if service_options.anonymous_enable %}
     local_enable=NO
 {% else %}
     local_enable=YES

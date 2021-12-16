@@ -20,31 +20,31 @@
 - name: create directory for anonimous access
   file:
     state: directory
-    path: "{{ services.anonymous_dir }}"
+    path: "{{ service_options.anonymous_dir }}"
     owner: nobody
     group: nobody
     mode: '0755'
-  with_items: services
+  with_items: service_options
 
 - name: create directory for uploads
   file:
     state: directory
-    path: "{{ services.anonymous_upload_dir }}"
+    path: "{{ service_options.anonymous_upload_dir }}"
     owner: nobody
     group: nobody
     mode: '0777'
-  with_items: services
+  with_items: service_options
 
 ## Configure vsftpd service with config template
 ##
 - name: put vsftpd config file
   template:
     src: vsftpd.conf.j2
-    dest: "{{ services.config_file }}"
+    dest: "{{ service_options.config_file }}"
     owner: root
     group: root
     mode: '0644'
-  with_items: services
+  with_items: service_options
   notify: reload vsftpd
 
 ## Allow access to ftp
@@ -75,13 +75,21 @@
 - name: Enable SELinux
   selinux:
     policy: targeted
-    state: permissive
+    state: enforcing
 
-- name: Set ftpd_anon_write flag on and keep it persistent across reboots
+- name: Set booleans for access anonimous ftp access
   seboolean:
-    name: ftpd_anon_write
+    name: "{{ item }}"
     state: yes
     persistent: yes
+  with_items: "{{ se_booleans }}"
   when:
     - ansible_selinux.status == "enabled"
+
+- name: Allow ftp modify files in /var/ftp/pub/upload
+  sefcontext:
+    target: '/var/ftp/pub/upload(/.*)?'
+    setype: public_content_rw_t
+    state: present
+  notify: apply SELinux
 ...

@@ -6,7 +6,7 @@ packages:
         - name: vsftpd
         - name: policycoreutils-python-utils
 
-services:
+service_options:
     name: vsftpd
     config_file: "/etc/vsftpd/vsftpd.conf"
     anonymous_enable: 'YES'
@@ -15,3 +15,7 @@ services:
     anonymous_upload_dir: "/var/ftp/pub/upload"
     selinux_policy: 'ftpd_anon_write'
     selinux_policy_state: 'on'
+
+se_booleans:
+    - ftpd_anon_write
+#    - ftp_home_dir
