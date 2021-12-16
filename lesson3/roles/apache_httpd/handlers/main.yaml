@@ -1,0 +1,11 @@
+---
+- name: reload httpd
+  systemd:
+    name: httpd
+    state: reloaded
+    enabled: yes
+
+- name: reload firewalld
+  service:
+    name: firewalld
+    state: reloaded

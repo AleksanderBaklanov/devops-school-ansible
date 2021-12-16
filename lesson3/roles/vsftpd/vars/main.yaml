@@ -1,0 +1,17 @@
+packages:
+    CentOS7:
+        - name: vsftpd
+        - name: policycoreutils-python
+    CentOS8:
+        - name: vsftpd
+        - name: policycoreutils-python-utils
+
+services:
+    name: vsftpd
+    config_file: "/etc/vsftpd/vsftpd.conf"
+    anonymous_enable: 'YES'
+    anonymous_dir: "/var/ftp/pub"
+    anonymous_upload_enable: 'YES'
+    anonymous_upload_dir: "/var/ftp/pub/upload"
+    selinux_policy: 'ftpd_anon_write'
+    selinux_policy_state: 'on'

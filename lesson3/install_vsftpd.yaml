@@ -1,0 +1,8 @@
+---
+- name: install vsftpd server and configure
+  hosts: ftp
+  become: true
+  gather_facts: true
+
+  roles:
+    - vsftpd

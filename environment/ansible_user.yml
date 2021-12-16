@@ -1,0 +1,37 @@
+---
+- name: customize_core_parameters
+  hosts: all
+  gather_facts: true
+  become: true
+
+  tasks:
+  - name: Add systemc users
+    user:
+      name: "{{ item.key }}"
+      password: "{{ item.value.password }}"
+      groups: wheel
+      update_password: on_create
+      comment: "{{ item.key }}@example.com"
+      shell: /bin/bash
+      home: "/home/{{ item.key }}"
+      state: present
+    with_dict: "{{ users }}"
+
+  - name: Create .ssh directory
+    file:
+      path: /home/{{ item.key }}/.ssh
+      state: directory
+      owner: "{{ item.key }}"
+      group: "{{ item.key }}"
+      mode: '0600'
+    with_dict: "{{ users }}"
+
+  - name: Put ssh key into
+    copy:
+      dest: /home/{{ item.key }}/.ssh/authorized_keys
+      content: "{{ item.value.ssh_pub_key }}"
+      owner: "{{ item.key }}"
+      group: "{{ item.key }}"
+      mode: '0600'
+    with_dict: "{{ users }}"
+...

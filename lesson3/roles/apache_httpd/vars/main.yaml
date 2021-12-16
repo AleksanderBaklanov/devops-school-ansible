@@ -1,0 +1,5 @@
+services:
+  httpd:
+    index_file: '/var/www/html/index.html'
+    page_title: 'My web server'
+    page_description: 'Welcome to my web server.'

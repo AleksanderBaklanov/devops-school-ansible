@@ -1,0 +1,87 @@
+---
+- name: set facts
+  set_fact:
+    OS_Version: "{{ hostvars[inventory_hostname].ansible_distribution }}{{ hostvars[inventory_hostname].ansible_distribution_major_version }}"
+
+- name: Say where we are at the moment
+  debug:
+    msg: "We are at {{ OS_Version }}"
+
+## Install vsftpd service and other suitable packages
+##
+- name: Install vsftpd service and a package for SELinux module
+  yum:
+    name: "{{ item.value }}"
+    state: present
+  with_dict: "{{ packages[OS_Version] }}"
+
+# create frp directories and set permissions
+#
+- name: create directory for anonimous access
+  file:
+    state: directory
+    path: "{{ services.anonymous_dir }}"
+    owner: nobody
+    group: nobody
+    mode: '0755'
+  with_items: services
+
+- name: create directory for uploads
+  file:
+    state: directory
+    path: "{{ services.anonymous_upload_dir }}"
+    owner: nobody
+    group: nobody
+    mode: '0777'
+  with_items: services
+
+## Configure vsftpd service with config template
+##
+- name: put vsftpd config file
+  template:
+    src: vsftpd.conf.j2
+    dest: "{{ services.config_file }}"
+    owner: root
+    group: root
+    mode: '0644'
+  with_items: services
+  notify: reload vsftpd
+
+## Allow access to ftp
+##
+- name: Enable ftp service port
+  firewalld:
+    service: ftp
+    permanent: yes
+    state: enabled
+  notify: reload firewalld
+
+- name: Enable 21/tcp port
+  firewalld:
+    port: 21/tcp
+    permanent: yes
+    state: enabled
+  notify: reload firewalld
+
+- name: Enable 21/tcp port
+  firewalld:
+    port: 20/tcp
+    permanent: yes
+    state: enabled
+  notify: reload firewalld
+
+## Enable SELinux and allow ftp write anonimous policy
+##
+- name: Enable SELinux
+  selinux:
+    policy: targeted
+    state: permissive
+
+- name: Set ftpd_anon_write flag on and keep it persistent across reboots
+  seboolean:
+    name: ftpd_anon_write
+    state: yes
+    persistent: yes
+  when:
+    - ansible_selinux.status == "enabled"
+...

@@ -5,6 +5,6 @@ all:
         web:
             hosts:
                 node1.example.com:
-        db:
+        ftp:
             hosts:
                 node2.example.com:

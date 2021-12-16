@@ -1,0 +1,11 @@
+---
+- name: reload vsftpd
+  systemd:
+    name: vsftpd
+    state: restarted
+    enabled: yes
+
+- name: reload firewalld
+  service:
+    name: firewalld
+    state: reloaded

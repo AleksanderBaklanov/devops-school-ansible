@@ -1,0 +1,29 @@
+---
+## Install Apache service
+##
+- name: Install Apache httpd service
+  yum:
+    name: httpd
+    state: present
+
+## Check and add index.html file
+##
+- name: create the infex file
+  template:
+    src: index.html.j2
+    dest: "{{ item.value.index_file }}"
+    owner: apache
+    group: apache
+    mode: '0644'
+  with_dict: "{{ services }}"
+  notify: reload httpd
+
+## Allow access to http
+##
+- name: Enable http port
+  firewalld:
+    service: http
+    permanent: yes
+    state: enabled
+  notify: reload firewalld
+...
